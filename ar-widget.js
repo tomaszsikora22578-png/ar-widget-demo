@@ -1,53 +1,84 @@
+// ar-widget.js (NOWA WERSJA)
 (function() {
-    const script = document.currentScript;
-    const clientId = script.getAttribute('data-client-id');
-    const productSku = script.getAttribute('data-product-sku');
-    const placeholder = document.getElementById('ar-placeholder');
+    const productsContainer = document.getElementById('products-container');
+    if (!productsContainer) return;
 
-    if (!placeholder) return; 
+    // WAŻNE: Wskazujemy na nowy plik z listą modeli
+    const apiEndpoint = 'https://tomaszsikora22578-png.github.io/ar-widget-demo/all-models-data.json'; 
+    const clientId = 'TEST_TOKEN_XYZ'; // Klient jest jeden dla całego demo
 
-    // WAŻNE: Używamy ścieżki do JSON-a na GitHub Pages
-    const apiEndpoint = 'https://tomaszsikora22578-png.github.io/ar-widget-demo/model-data.json'; 
+    // 1. Ładowanie skryptu Model-Viewer (na początku, dla wszystkich kart)
+    const modelViewerScript = document.createElement('script');
+    modelViewerScript.type = 'module';
+    modelViewerScript.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
+    document.head.appendChild(modelViewerScript);
 
     fetch(apiEndpoint)
         .then(response => {
-            if (!response.ok) throw new Error('Błąd ładowania danych modelu 3D.');
-            return response.json();
+            if (!response.ok) throw new Error('Błąd ładowania listy produktów.');
+            return response.json(); // Pobierzemy całą listę
         })
-        .then(data => {
-            // Wstrzyknięcie Model-Viewer (automatycznie obsługuje AR na iOS/Android)
-            const modelViewerHtml = `
-                <model-viewer 
-                    src="${data.glb}"
-                    ar
-                    ar-modes="webxr scene-viewer quick-look"
-                    ios-src="${data.usdz}"
-                    alt="${data.alt_text}"
-                    shadow-intensity="1"
-                    camera-controls
-                    style="width: 100%; height: 100%;"
-                >
-                    <button slot="ar-button" style="background-color: #f57c00; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                        ZOBACZ W SWOIM WNĘTRZU (AR) 🏠
-                    </button>
-                </model-viewer>
-            `;
-            placeholder.innerHTML = modelViewerHtml;
+        .then(products => {
+            products.forEach(product => {
+                // 2. TWORZENIE KARTY PRODUKTU
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <style>
+                        .product-card {
+                            border: 1px solid #eee;
+                            padding: 15px;
+                            margin-bottom: 20px;
+                            display: inline-block; /* Aby były obok siebie */
+                            width: 300px;
+                            margin-right: 20px;
+                        }
+                        .model-viewer-container {
+                            height: 300px; /* Określona wysokość dla 3D */
+                            width: 100%;
+                            margin-bottom: 10px;
+                        }
+                    </style>
+                    <h2>${product.name}</h2>
+                    <p>${product.description}</p>
+                    <div id="ar-placeholder-${product.productId}" class="model-viewer-container">
+                        </div>
+                `;
+                productsContainer.appendChild(productCard);
 
-            // Ładowanie Model-Viewer (dla poprawnego renderowania 3D)
-            const modelViewerScript = document.createElement('script');
-            modelViewerScript.type = 'module';
-            modelViewerScript.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
-            document.head.appendChild(modelViewerScript);
+                // 3. WSTRZYKNIĘCIE MODEL-VIEWER DO NOWEJ KARTY
+                const placeholder = document.getElementById(`ar-placeholder-${product.productId}`);
+                if (placeholder) {
+                    placeholder.innerHTML = `
+                        <model-viewer 
+                            src="${product.glb}"
+                            ar
+                            ar-modes="webxr scene-viewer quick-look"
+                            ios-src="${product.usdz}"
+                            alt="${product.alt_text}"
+                            shadow-intensity="1" 
+                            camera-controls
+                            style="width: 100%; height: 100%;"
+                        >
+                            <button slot="ar-button" style="/* ... styl przycisku ... */">
+                                ZOBACZ ${product.name} W AR 🏠
+                            </button>
+                        </model-viewer>
+                    `;
+                }
 
-            // PRZYKŁAD ANALITYKI: Śledzenie, ile razy kliknięto AR
-            document.querySelector('#ar-placeholder button').addEventListener('click', () => {
-                // TUTAJ docelowo będzie wysyłany POST do Twojego API C#
-                console.log(`[ANALYTICS] AR Clicked! Client: ${clientId}, Product: ${productSku}`);
+                // 4. ANIMALITYKA (po stworzeniu przycisku)
+                const arButton = productCard.querySelector('button[slot="ar-button"]');
+                if (arButton) {
+                     arButton.addEventListener('click', () => {
+                        console.log(`[ANALYTICS] AR Clicked! Product: ${product.productId}`);
+                        // Tutaj docelowo wywołujesz POST do Twojego API C#
+                    });
+                }
             });
         })
         .catch(error => {
-            placeholder.innerHTML = `<p style="color: red; text-align: center;">Nie udało się załadować wizualizacji AR. ${error.message}</p>`;
+            productsContainer.innerHTML = `<p style="color: red;">Błąd: ${error.message}</p>`;
             console.error(error);
         });
 })();
