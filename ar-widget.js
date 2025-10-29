@@ -7,7 +7,7 @@
     if (!placeholder) return; 
 
     // WAŻNE: Używamy ścieżki do JSON-a na GitHub Pages
-    const apiEndpoint = 'https://[TWÓJ_USERNAME].github.io/ar-widget-demo/model-data.json'; 
+    const apiEndpoint = 'https://tomaszsikora22578-png.github.io/ar-widget-demo/model-data.json'; 
 
     fetch(apiEndpoint)
         .then(response => {
