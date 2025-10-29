@@ -1,48 +1,108 @@
-// ar-widget.js (NOWA WERSJA)
+// ar-widget.js (WERSJA POPRAWIONA I KOMPLETNA)
 (function() {
     const productsContainer = document.getElementById('products-container');
     if (!productsContainer) return;
 
-    // WAŻNE: Wskazujemy na nowy plik z listą modeli
-    const apiEndpoint = 'https://localhost:7149/api/product/models'; 
-    const clientId = 'TEST_TOKEN_XYZ'; // Klient jest jeden dla całego demo
+    // Definicja Endpointów i Tokenu
+    const apiEndpoint = 'https://localhost:7149/api/product/models'; 
+    const analyticsEndpoint = 'https://localhost:7149/api/analytics/track'; // 💡 Dodany Endpoint
+    const clientId = 'TEST_TOKEN_XYZ'; 
+    productsContainer.innerHTML = '<p>Ładowanie modeli AR...</p>';
 
-    // 1. Ładowanie skryptu Model-Viewer (na początku, dla wszystkich kart)
+    // 1. Funkcja do Wysłania Analityki (POST)
+    function trackAnalytics(productId, clientToken) {
+        const data = {
+            ClientToken: clientToken, 
+            ProductId: productId 
+        };
+
+        fetch(analyticsEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Client-Token': clientToken 
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok || response.status === 204) {
+                console.log(`[ANALYTICS] Success: AR Click logged for ${productId}.`);
+            } else {
+                console.error(`[ANALYTICS] [C# API Error] Status: ${response.status}`);
+            }
+        })
+        .catch(error => console.error('[ANALYTICS] Fetch Error:', error));
+    }
+
+
+    // 2. Ładowanie skryptu Model-Viewer
     const modelViewerScript = document.createElement('script');
     modelViewerScript.type = 'module';
     modelViewerScript.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
     document.head.appendChild(modelViewerScript);
 
- fetch(apiEndpoint, {
-        method: 'GET', // Metoda jest GET
-        headers: { 
+    // 3. Główne Zapytanie i Renderowanie (GET)
+    fetch(apiEndpoint, {
+        method: 'GET',
+        headers: { 
             'Content-Type': 'application/json',
-            // 💡 KLUCZOWY FRAGMENT: Dodajemy nagłówek X-Client-Token
-            'X-Client-Token': clientId 
+            'X-Client-Token': clientId 
         }
-    }).then(response => {
-        // 🚨 Dodajemy weryfikację statusu HTTP
+    })
+    .then(response => {
         if (!response.ok) {
-            // Jeśli status to np. 401, 404 lub inny błąd, rzucamy wyjątek
-            throw new Error(`API returned status ${response.status}. Check client token and subscription status.`);
+            return response.json().then(data => {
+                throw new Error(`Błąd API: Status ${response.status}. Treść: ${data.error || 'Nieznany błąd.'}`);
+            });
         }
         return response.json();
     })
     .then(products => {
-        // 🚨 Dodajemy weryfikację, czy to na pewno tablica
         if (!Array.isArray(products)) {
-            // Jeśli to nie jest tablica, też rzucamy wyjątek
-             throw new Error("API response is not a valid array of products.");
+             throw new Error("API nie zwróciło tablicy produktów.");
         }
         
-        // Jeśli wszystko OK, kontynuujemy z pętlą
-        products.forEach(product => { 
-            // ... reszta Twojego kodu w pętli ...
+        // Usunięcie komunikatu 'Ładowanie...'
+        productsContainer.innerHTML = '';
+        
+        // 4. LOGIKA RENDEROWANIA (Uzupelniony KOD!)
+        products.forEach(product => { 
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <h2>${product.name}</h2>
+                
+                <model-viewer
+                    src="${product.glb}"
+                    ios-src="${product.usdz}"
+                    alt="${product.alt_text}"
+                    shadow-intensity="1"
+                    camera-controls
+                    touch-action="pan-y"
+                    ar
+                    ar-modes="webxr scene-viewer quick-look"
+                    ar-scale="auto"
+                >
+                    <button slot="ar-button" class="ar-button">
+                        Zobacz w AR
+                    </button>
+                </model-viewer>
+            `;
+            
+            // 5. OBSŁUGA KLIKNIĘCIA I WYSYŁANIE ANALITYKI
+            const arButton = card.querySelector('.ar-button');
+            if (arButton) {
+                arButton.addEventListener('click', () => {
+                    // 💡 Wywołanie funkcji POST do API C#
+                    trackAnalytics(product.productId, clientId);
+                });
+            }
+            
+            productsContainer.appendChild(card);
         });
     })
     .catch(error => {
-        // Użyj productsContainer, aby wyświetlić błąd użytkownikowi
-        productsContainer.innerHTML = `<p style="color: red; font-weight: bold;">Błąd ładowania produktów AR: ${error.message}</p>`;
-        console.error("Critical Fetch Error:", error);
+        productsContainer.innerHTML = `<p style="color: red; font-weight: bold;">[Błąd Krytyczny] Nie można załadować wtyczki: ${error.message}</p>`;
+        console.error("Krytyczny Błąd Fetch:", error);
     });
 })();
