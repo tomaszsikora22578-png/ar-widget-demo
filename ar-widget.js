@@ -20,68 +20,29 @@
             // 💡 KLUCZOWY FRAGMENT: Dodajemy nagłówek X-Client-Token
             'X-Client-Token': clientId 
         }
+    }).then(response => {
+        // 🚨 Dodajemy weryfikację statusu HTTP
+        if (!response.ok) {
+            // Jeśli status to np. 401, 404 lub inny błąd, rzucamy wyjątek
+            throw new Error(`API returned status ${response.status}. Check client token and subscription status.`);
+        }
+        return response.json();
     })
-        .then(products => {
-            products.forEach(product => {
-                // 2. TWORZENIE KARTY PRODUKTU
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <style>
-                        .product-card {
-                            border: 1px solid #eee;
-                            padding: 15px;
-                            margin-bottom: 20px;
-                            display: inline-block; /* Aby były obok siebie */
-                            width: 300px;
-                            margin-right: 20px;
-                        }
-                        .model-viewer-container {
-                            height: 300px; /* Określona wysokość dla 3D */
-                            width: 100%;
-                            margin-bottom: 10px;
-                        }
-                    </style>
-                    <h2>${product.name}</h2>
-                    <p>${product.description}</p>
-                    <div id="ar-placeholder-${product.productId}" class="model-viewer-container">
-                        </div>
-                `;
-                productsContainer.appendChild(productCard);
-
-                // 3. WSTRZYKNIĘCIE MODEL-VIEWER DO NOWEJ KARTY
-                const placeholder = document.getElementById(`ar-placeholder-${product.productId}`);
-                if (placeholder) {
-                    placeholder.innerHTML = `
-                        <model-viewer 
-                            src="${product.glb}"
-                            ar
-                            ar-modes="webxr scene-viewer quick-look"
-                            ios-src="${product.usdz}"
-                            alt="${product.alt_text}"
-                            shadow-intensity="1" 
-                            camera-controls
-                            style="width: 100%; height: 100%;"
-                        >
-                            <button slot="ar-button" style="/* ... styl przycisku ... */">
-                                ZOBACZ ${product.name} W AR 🏠
-                            </button>
-                        </model-viewer>
-                    `;
-                }
-
-                // 4. ANIMALITYKA (po stworzeniu przycisku)
-                const arButton = productCard.querySelector('button[slot="ar-button"]');
-                if (arButton) {
-                     arButton.addEventListener('click', () => {
-                        console.log(`[ANALYTICS] AR Clicked! Product: ${product.productId}`);
-                        // Tutaj docelowo wywołujesz POST do Twojego API C#
-                    });
-                }
-            });
-        })
-        .catch(error => {
-            productsContainer.innerHTML = `<p style="color: red;">Błąd: ${error.message}</p>`;
-            console.error(error);
+    .then(products => {
+        // 🚨 Dodajemy weryfikację, czy to na pewno tablica
+        if (!Array.isArray(products)) {
+            // Jeśli to nie jest tablica, też rzucamy wyjątek
+             throw new Error("API response is not a valid array of products.");
+        }
+        
+        // Jeśli wszystko OK, kontynuujemy z pętlą
+        products.forEach(product => { 
+            // ... reszta Twojego kodu w pętli ...
         });
+    })
+    .catch(error => {
+        // Użyj productsContainer, aby wyświetlić błąd użytkownikowi
+        productsContainer.innerHTML = `<p style="color: red; font-weight: bold;">Błąd ładowania produktów AR: ${error.message}</p>`;
+        console.error("Critical Fetch Error:", error);
+    });
 })();
