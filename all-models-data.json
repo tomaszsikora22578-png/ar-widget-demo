@@ -1,0 +1,18 @@
+[
+  {
+    "productId": "LAMP-XL-IND",
+    "name": "Lampa Biurowa",
+    "description": "Idealna do Twojego biura.",
+    "glb": "https://tomaszsikora22578-png.github.io/ar-widget-demo/assets/lampa.glb",
+    "usdz": "https://tomaszsikora22578-png.github.io/ar-widget-demo/assets/lampa.usdz",
+    "alt_text": "Lampa 3D"
+  },
+  {
+    "productId": "Waza",
+    "name": "Waza klasyczna",
+    "description": "Podniesie klasę Twojego salonu.",
+    "glb": "https://tomaszsikora22578-png.github.io/ar-widget-demo/assets/waza.glb", // Musisz mieć ten plik!
+    "usdz": "https://tomaszsikora22578-png.github.io/ar-widget-demo/assets/waza.usdz", // Musisz mieć ten plik!
+    "alt_text": "Waza 3D"
+  }
+]
