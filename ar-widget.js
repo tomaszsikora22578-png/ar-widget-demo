@@ -4,7 +4,7 @@
     if (!productsContainer) return;
 
     // WAŻNE: Wskazujemy na nowy plik z listą modeli
-    const apiEndpoint = 'https://tomaszsikora22578-png.github.io/ar-widget-demo/all-models-data.json'; 
+    const apiEndpoint = 'https://localhost:7000/api/product/models'; 
     const clientId = 'TEST_TOKEN_XYZ'; // Klient jest jeden dla całego demo
 
     // 1. Ładowanie skryptu Model-Viewer (na początku, dla wszystkich kart)
@@ -13,11 +13,14 @@
     modelViewerScript.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
     document.head.appendChild(modelViewerScript);
 
-    fetch(apiEndpoint)
-        .then(response => {
-            if (!response.ok) throw new Error('Błąd ładowania listy produktów.');
-            return response.json(); // Pobierzemy całą listę
-        })
+ fetch(apiEndpoint, {
+        method: 'GET', // Metoda jest GET
+        headers: { 
+            'Content-Type': 'application/json',
+            // 💡 KLUCZOWY FRAGMENT: Dodajemy nagłówek X-Client-Token
+            'X-Client-Token': clientId 
+        }
+    })
         .then(products => {
             products.forEach(product => {
                 // 2. TWORZENIE KARTY PRODUKTU
