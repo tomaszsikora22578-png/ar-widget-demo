@@ -1,4 +1,4 @@
-name: Firebase Hosting CI/CD
+name: Firebase Hosting CD
 
 on:
   push:
@@ -6,21 +6,29 @@ on:
       - main  # Akcja uruchomi się po pushu do gałęzi 'main'
 
 jobs:
-  deploy_frontend:
+  build_and_deploy:
     name: Wdrożenie na Firebase Hosting
     runs-on: ubuntu-latest
     
     steps:
       - name: Sprawdzenie kodu (Checkout)
         uses: actions/checkout@v4
-      
-      # Używamy dedykowanej akcji w9jds/firebase-action
+
+      # Używamy oficjalnej akcji Google dla stabilnego wdrożenia
       - name: Wdrożenie na Firebase Hosting
-        uses: w9jds/firebase-action@master
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          # Używamy domyślnej komendy deploy. Polegamy na poprawnym firebase.json
-          args: deploy
-        env:
-          # KLUCZOWE: Przekazujemy Twój sekret do zmiennej środowiskowej FIREBASE_TOKEN
-          FIREBASE_TOKEN: ${{ secrets.GCP_SA_KEY }}
-          PROJECT_ID: ar-widget-project-5f6f8
+          # KLUCZOWE: Wprowadzamy poprawne, pełne ID projektu
+          projectId: ar-widget-project-5f6f8
+          
+          # KLUCZOWE: Wymuszamy, by cel wdrożenia był 'ar-widget-prod' (jeśli go zainicjowałeś)
+          # Jeśli użyłeś domyślnego celu, zmień tę linię na: target: ar-widget-project-5f6f8
+          target: ar-widget-prod 
+          
+          # KLUCZOWE: Uwierzytelnienie za pomocą Klucza Konta Usługowego
+          # Używamy tutaj nazwy zmiennej, której oficjalnie oczekuje akcja Google dla SA Key
+          # Skoro TWÓJ sekret to FIREBASE_DEPLOY_TOKEN, musimy go podać:
+          serviceAccount: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
+          
+          # Upewniamy się, że akcja wie, co ma wdrażać
+          entryPoint: .
