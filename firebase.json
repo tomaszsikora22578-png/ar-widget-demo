@@ -1,14 +1,23 @@
 {
-  "hosting": {
-    "public": ".",
-    "ignore": [
-      "firebase.json",
-      ".firebaserc",
-      ".github",
-      "node_modules",
-      "package.json",
-      "package-lock.json"
-    ],
-    "target": "ar-widget-project"
+  "hosting": [
+    {
+      "target": "ar-widget-prod",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        ".firebaserc",
+        ".github",
+        "node_modules",
+        "package.json",
+        "package-lock.json"
+      ]
+    }
+  ],
+  "targets": {
+    "hosting": {
+      "ar-widget-prod": {
+        "site": "ar-widget-prod"
+      }
+    }
   }
 }
