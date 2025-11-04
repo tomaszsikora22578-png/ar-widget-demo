@@ -23,4 +23,4 @@ jobs:
         env:
           # KLUCZOWE: Przekazujemy Twój sekret do zmiennej środowiskowej FIREBASE_TOKEN
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
-          PROJECT_ID: ar-widget-project
+          PROJECT_ID: ar-widget-project-5f6f8
