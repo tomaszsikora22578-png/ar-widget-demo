@@ -14,14 +14,14 @@ jobs:
       - name: Sprawdzenie kodu (Checkout)
         uses: actions/checkout@v4
       
-      # KLUCZOWA ZMIANA: Używamy akcji stworzonej do wdrażania na Firebase.
+      # Zamiast w9jds, użyjemy FirebaseExtended, która ma mniej problemów z Kluczami SA.
       - name: Wdrożenie na Firebase Hosting
-        uses: w9jds/firebase-action@master
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          # Wszystkie parametry w komendzie 'args'
-          args: deploy --project ar-widget-project --only hosting:ar-widget-project
-        env:
-          # KLUCZOWA POPRAWKA: Przekazujemy Token do zmiennej środowiskowej FIREBASE_TOKEN,
-          # którą ta akcja poprawnie odczytuje i udostępnia CLI.
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
-          PROJECT_ID: ar-widget-project
+          # Klucz SA jest przekazywany tutaj. W tym akcji to jest standardowy input.
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ar-widget-project
+          # Wdrożenie domyślne. Wymaga tylko, aby public: "." było w firebase.json
+          # Dodajemy repoToken na wypadek konieczności użycia go przez akcję
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          
