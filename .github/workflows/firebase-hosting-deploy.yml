@@ -26,5 +26,6 @@ jobs:
         # Używamy --token z GitHub Secrets
         run: firebase deploy --only hosting --token ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
         env:
-          # Konieczne, by akcja wiedziała, że to jest CI/CD
           FIREBASE_CLI_PREVIEWS: hostingchannels
+        # !!! KLUCZOWA ZMIANA: Upewnienie się, że komenda działa z głównego katalogu
+        working-directory: ${{ github.workspace }}
