@@ -25,7 +25,7 @@ jobs:
       - name: Wdrożenie na Firebase Hosting
         # Używamy --token z GitHub Secrets
         # KLUCZOWA ZMIANA: Dodajemy --project, aby zignorować błąd .firebaserc
-        run: firebase deploy --only hosting --token ${{ secrets.FIREBASE_DEPLOY_TOKEN }} --project ar-widget-project
+        run: firebase deploy --only hosting --token ${{ secrets.FIREBASE_DEPLOY_TOKEN }} --project ar-widget-project --site ar-widget-project
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
         # !!! Utrzymujemy working-directory, aby upewnić się, że pozostałe pliki są widziane
