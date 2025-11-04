@@ -1,4 +1,4 @@
-name: Firebase Hosting CI/CD - OSTATECZNA WERSJA
+name: Firebase Hosting CI/CD
 
 on:
   push:
@@ -7,21 +7,20 @@ on:
 
 jobs:
   deploy_frontend:
-    name: Wdrożenie na Firebase Hosting (Użycie dedykowanej akcji)
+    name: Wdrożenie na Firebase Hosting
     runs-on: ubuntu-latest
     
     steps:
       - name: Sprawdzenie kodu (Checkout)
         uses: actions/checkout@v4
       
-      # Zamiast w9jds, użyjemy FirebaseExtended, która ma mniej problemów z Kluczami SA.
+      # Używamy dedykowanej akcji w9jds/firebase-action
       - name: Wdrożenie na Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+        uses: w9jds/firebase-action@master
         with:
-          # Klucz SA jest przekazywany tutaj. W tym akcji to jest standardowy input.
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: ar-widget-project
-          # Wdrożenie domyślne. Wymaga tylko, aby public: "." było w firebase.json
-          # Dodajemy repoToken na wypadek konieczności użycia go przez akcję
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          
+          # Używamy domyślnej komendy deploy. Polegamy na poprawnym firebase.json
+          args: deploy
+        env:
+          # KLUCZOWE: Przekazujemy Twój sekret do zmiennej środowiskowej FIREBASE_TOKEN
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
+          PROJECT_ID: ar-widget-project
