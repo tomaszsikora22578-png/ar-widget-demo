@@ -22,13 +22,11 @@ jobs:
           projectId: ar-widget-project-5f6f8
           
           # KLUCZOWE: Wymuszamy, by cel wdrożenia był 'ar-widget-prod' (jeśli go zainicjowałeś)
-          # Jeśli użyłeś domyślnego celu, zmień tę linię na: target: ar-widget-project-5f6f8
           target: ar-widget-prod 
           
-          # KLUCZOWE: Uwierzytelnienie za pomocą Klucza Konta Usługowego
-          # Używamy tutaj nazwy zmiennej, której oficjalnie oczekuje akcja Google dla SA Key
-          # Skoro TWÓJ sekret to FIREBASE_DEPLOY_TOKEN, musimy go podać:
-          serviceAccount: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
+          # POPRAWKA NAZEWNICTWA: Zmieniamy 'serviceAccount' na 'firebaseServiceAccount'.
+          # Akcja teraz wie, że ten input dostarcza klucz SA.
+          firebaseServiceAccount: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
           
           # Upewniamy się, że akcja wie, co ma wdrażać
           entryPoint: .
