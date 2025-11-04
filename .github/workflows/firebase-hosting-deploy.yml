@@ -3,30 +3,35 @@ name: Firebase Hosting CD
 on:
   push:
     branches:
-      - main  # Akcja uruchomi się po pushu do gałęzi 'main'
+      - main  # Ustaw gałąź, która ma wyzwalać wdrożenie
 
 jobs:
   build_and_deploy:
-    name: Wdrożenie na Firebase Hosting
+    name: Build & Deploy to Firebase
     runs-on: ubuntu-latest
     
+    # Kroki wykonywane na maszynie wirtualnej
     steps:
-      - name: Sprawdzenie kodu (Checkout)
+      - name: Sprawdzenie kodu z repozytorium
         uses: actions/checkout@v4
 
-      # Używamy oficjalnej akcji Google dla stabilnego wdrożenia
-      - name: Wdrożenie na Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      # Firebase CLI wymaga środowiska Node.js
+      - name: Ustawienie Node.js
+        uses: actions/setup-node@v4
         with:
-          # KLUCZOWE: Wprowadzamy poprawne, pełne ID projektu
-          projectId: ar-widget-project-5f6f8
-          
-          # KLUCZOWE: Wymuszamy, by cel wdrożenia był 'ar-widget-prod' (jeśli go zainicjowałeś)
-          target: ar-widget-prod 
-          
-          # POPRAWKA NAZEWNICTWA: Zmieniamy 'serviceAccount' na 'firebaseServiceAccount'.
-          # Akcja teraz wie, że ten input dostarcza klucz SA.
-          firebaseServiceAccount: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
-          
-          # Upewniamy się, że akcja wie, co ma wdrażać
-          entryPoint: .
+          node-version: '18' # Zalecana stabilna wersja
+
+      # Instalacja narzędzia Firebase CLI
+      - name: Instalacja Firebase CLI
+        run: npm install -g firebase-tools
+
+      # Ostatni krok: Wdrożenie na Firebase Hosting
+      - name: Wdrożenie na Firebase Hosting
+        # Używamy jawnej komendy deploy z prawidłowym ID projektu
+        # CLI użyje teraz poprawnego ID z .firebaserc oraz --project ar-widget-project-5f6f8
+        run: firebase deploy --project ar-widget-project-5f6f8 --only hosting
+        env:
+          # KLUCZOWE: Wstrzykujemy Klucz Konta Usługowego (pełny JSON)
+          # do zmiennej środowiskowej GOOGLE_CREDENTIALS.
+          # To jest najbardziej stabilny sposób uwierzytelniania Kluczem SA w CI/CD.
+          GOOGLE_CREDENTIALS: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
