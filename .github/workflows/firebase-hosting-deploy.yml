@@ -13,22 +13,15 @@ jobs:
     steps:
       - name: Sprawdzenie kodu (Checkout)
         uses: actions/checkout@v4
-
-      # Usunęliśmy instalację Node.js i Firebase CLI przez npm,
-      # ponieważ to powodowało błędy ze starą wersją CLI.
       
       # KLUCZOWA ZMIANA: Używamy akcji stworzonej do wdrażania na Firebase.
       - name: Wdrożenie na Firebase Hosting
         uses: w9jds/firebase-action@master
         with:
-          # Token Firebase, który Pan wygenerował
-          firebaseToken: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
-          # Projekt ID (ID Firebase, a nie nazwa)
-          args: deploy --project ar-widget-project --only hosting
-          # Wdrożenie domyślnej strony hostingowej
-          site: ar-widget-project
-          # Katalog, w którym są pliki firebase.json i .firebaserc
-          channel: live
+          # Wszystkie parametry w komendzie 'args'
+          args: deploy --project ar-widget-project --only hosting:ar-widget-project
         env:
-          # Upewniamy się, że to działa w katalogu głównym (gdzie jest index.html)
+          # KLUCZOWA POPRAWKA: Przekazujemy Token do zmiennej środowiskowej FIREBASE_TOKEN,
+          # którą ta akcja poprawnie odczytuje i udostępnia CLI.
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
           PROJECT_ID: ar-widget-project
