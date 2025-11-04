@@ -1,0 +1,6 @@
+.firebaserc
+{
+  "projects": {
+    "default": "ar-widget-project"
+  }
+}
