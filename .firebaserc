@@ -1,6 +1,5 @@
-.firebaserc
 {
   "projects": {
-    "default": "ar-widget-project"
+    "default": "ar-widget-project-5f6f8"
   }
 }
