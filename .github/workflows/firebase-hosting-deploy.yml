@@ -22,7 +22,7 @@ jobs:
       
       # Krok 1: Utworzenie pliku Klucza SA z sekreta
       - name: Utworzenie pliku Klucza SA
-        run: echo '${{ secrets.FIREBASE_DEPLOY_TOKEN }}' > service-account-key.json
+        run: echo '${{ secrets.GCP_SA_KEY }}' > service-account-key.json
       
       # Krok 2: Wdrożenie z jawnym wskazaniem pliku Klucza SA
       - name: Wdrożenie na Firebase Hosting (GOOGLE_APPLICATION_CREDENTIALS)
