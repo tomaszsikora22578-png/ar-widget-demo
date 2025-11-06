@@ -30,11 +30,9 @@ async function fetchWidgets() {
 
     try {
         const headers = new Headers();
-        // ***** ZMIANA TUTAJ: UŻYWAMY X-Client-Token *****
-        // Wysłanie tokena w nagłówku, którego oczekuje middleware C#
-        headers.append('X-Client-Token', DEMO_TOKEN); 
-
-        // USUŃ 'Bearer ', ponieważ middleware C# oczekuje tylko samego tokena (TEST_TOKEN_XYZ)
+        // ***** OSTATECZNA POPRAWKA: UŻYWAMY STANDARDOWEGO NAGŁÓWKA AUTORYZACYJNEGO *****
+        // Backend C# oczekuje Authorization: Bearer <token>
+        headers.append('Authorization', `Bearer ${DEMO_TOKEN}`); 
 
         const response = await fetch(API_URL, {
             method: 'GET',
