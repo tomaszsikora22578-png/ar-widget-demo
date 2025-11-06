@@ -14,11 +14,11 @@ jobs:
       - name: Sprawdzenie kodu (Checkout)
         uses: actions/checkout@v4
 
-      # Krok 1: Instalacja Narzędzi Google Cloud
+      # Krok 1: Aktywacja konta SA przez dedykowaną akcję Google
       - name: Autoryzacja gcloud
         uses: google-github-actions/auth@v2
         with:
-          # Klucz SA jest bezpośrednio wstrzykiwany do akcji Google
+          # KLUCZOWA ZMIANA: Używamy poprawnej nazwy sekreta: GCP_SA_KEY
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       # Krok 2: Ustawienie Node.js i instalacja Firebase CLI
@@ -30,6 +30,5 @@ jobs:
       
       # Krok 3: Wdrożenie na Firebase Hosting
       - name: Wdrożenie na Firebase Hosting
-        # Teraz, gdy gcloud auth ustawił poświadczenia,
-        # Firebase CLI może użyć domyślnego kontekstu konta SA.
+        # Poświadczenia są już ustawione w kontekście gcloud/Firebase
         run: firebase deploy --project ar-widget-project-5f6f8 --only hosting
