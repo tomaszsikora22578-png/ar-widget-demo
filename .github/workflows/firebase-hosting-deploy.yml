@@ -18,7 +18,7 @@ jobs:
       - name: Autoryzacja gcloud
         uses: google-github-actions/auth@v2
         with:
-          # KLUCZOWA ZMIANA: Używamy poprawnej nazwy sekreta: GCP_SA_KEY
+          # KLUCZOWA ZMIANA: Używamy GCP_SA_KEY
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       # Krok 2: Ustawienie Node.js i instalacja Firebase CLI
