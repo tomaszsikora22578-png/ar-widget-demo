@@ -4,8 +4,8 @@
     if (!productsContainer) return;
 
     // Definicja Endpointów i Tokenu
-    const apiEndpoint = 'https://localhost:7149/api/product/models'; 
-    const analyticsEndpoint = 'https://localhost:7149/api/analytics/track'; // 💡 Dodany Endpoint
+    const apiEndpoint = 'https://ar-widget-api-849496305543.europe-central2.run.app/api/product/models'; 
+    const analyticsEndpoint = 'https://ar-widget-api-849496305543.europe-central2.run.app/api'; // 💡 Dodany Endpoint
     const clientId = 'TEST_TOKEN_XYZ'; 
     productsContainer.innerHTML = '<p>Ładowanie modeli AR...</p>';
 
