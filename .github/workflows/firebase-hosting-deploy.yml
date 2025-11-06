@@ -26,7 +26,7 @@ jobs:
       - name: Instalacja gcloud i Ustawienie Poprawnego ID Projektu
         uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: ar-widget-project-5f6f8
+          project_id: ar-widget-project
 
       # Krok 3: Konfiguracja Node.js i Firebase CLI
       - name: Ustawienie Node.js i Instalacja Firebase CLI
