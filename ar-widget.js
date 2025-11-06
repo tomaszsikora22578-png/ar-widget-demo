@@ -32,7 +32,7 @@ async function fetchWidgets() {
         const headers = new Headers();
         // ***** OSTATECZNA POPRAWKA: UŻYWAMY STANDARDOWEGO NAGŁÓWKA AUTORYZACYJNEGO *****
         // Backend C# oczekuje Authorization: Bearer <token>
-        headers.append('Authorization', `Bearer ${DEMO_TOKEN}`); 
+        headers.append('X-Client-Token', DEMO_TOKEN);
 
         const response = await fetch(API_URL, {
             method: 'GET',
