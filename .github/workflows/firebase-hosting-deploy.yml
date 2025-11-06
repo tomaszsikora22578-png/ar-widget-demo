@@ -14,19 +14,28 @@ jobs:
       - name: Sprawdzenie kodu (Checkout)
         uses: actions/checkout@v4
 
-      # Ustawienie Node.js i instalacja Firebase CLI
+      # Krok 1: AUTORYZACJA KLUCZEM SA
+      # Akcja wczytuje Klucz SA (GCP_SA_KEY) i tymczasowo ustawia kontekst na błędny ID (ar-widget-project).
+      - name: Autoryzacja gcloud i Firebase
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          
+      # Krok 2: JAWNE NADPISANIE BŁĘDNEGO KONTEKSTU ID
+      # Ten krok instaluje gcloud CLI i wymusza ustawienie POPRAWNEGO ID projektu (ar-widget-project-5f6f8).
+      - name: Instalacja gcloud i Ustawienie Poprawnego ID Projektu
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ar-widget-project-5f6f8
+
+      # Krok 3: Konfiguracja Node.js i Firebase CLI
       - name: Ustawienie Node.js i Instalacja Firebase CLI
         uses: actions/setup-node@v4
         with:
           node-version: '18' 
       - run: npm install -g firebase-tools
       
-      # Ostatni krok: Wdrożenie na Firebase Hosting
-      - name: Wdrożenie na Firebase Hosting (Użycie Klucza SA)
-        # Używamy --project, aby jawnie wskazać ID
-        # Używamy --only hosting, aby wdrożyć tylko pliki frontendu
-        run: firebase deploy --project ar-widget-project-5f6f8 --only hosting
-        env:
-          # KLUCZOWE: Wstrzykujemy Klucz SA (JSON) do zmiennej środowiskowej GOOGLE_CREDENTIALS,
-          # używając poprawnej nazwy sekreta: GCP_SA_KEY
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+      # Krok 4: Wdrożenie na Firebase Hosting
+      - name: Wdrożenie na Firebase Hosting
+        # gcloud (Krok 2) ustawił poświadczenia i kontekst, więc wystarczy sama komenda deploy.
+        run: firebase deploy --only hosting
