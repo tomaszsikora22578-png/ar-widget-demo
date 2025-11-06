@@ -1,108 +1,78 @@
-// ar-widget.js (WERSJA POPRAWIONA I KOMPLETNA)
-(function() {
-    const productsContainer = document.getElementById('products-container');
-    if (!productsContainer) return;
+// Cloud Run API endpoint
+const API_URL = 'https://ar-widget-api-849496305543.europe-central2.run.app/api/widget';
+        
+// TEST TOKEN (You need to replace this with a valid token if TEST_TOKEN_XYZ fails)
+const DEMO_TOKEN = 'TEST_TOKEN_XYZ'; 
 
-    // Definicja Endpointów i Tokenu
-    const apiEndpoint = 'https://ar-widget-api-849496305543.europe-central2.run.app/api/product/models'; 
-    const analyticsEndpoint = 'https://ar-widget-api-849496305543.europe-central2.run.app/api'; // 💡 Dodany Endpoint
-    const clientId = 'TEST_TOKEN_XYZ'; 
-    productsContainer.innerHTML = '<p>Ładowanie modeli AR...</p>';
+// Function to initialize the frontend and fetch data
+function initializeFrontend() {
+    const fetchButton = document.getElementById('fetch-button');
+    if (fetchButton) {
+        fetchButton.addEventListener('click', fetchWidgets);
+        // Initial fetch on load
+        fetchWidgets(); 
+    }
+}
 
-    // 1. Funkcja do Wysłania Analityki (POST)
-    function trackAnalytics(productId, clientToken) {
-        const data = {
-            ClientToken: clientToken, 
-            ProductId: productId 
-        };
+// Core function to fetch data from the Cloud Run API
+async function fetchWidgets() {
+    const resultDiv = document.getElementById('api-result');
+    const statusDiv = document.getElementById('api-status');
 
-        fetch(analyticsEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Client-Token': clientToken 
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            if (response.ok || response.status === 204) {
-                console.log(`[ANALYTICS] Success: AR Click logged for ${productId}.`);
-            } else {
-                console.error(`[ANALYTICS] [C# API Error] Status: ${response.status}`);
-            }
-        })
-        .catch(error => console.error('[ANALYTICS] Fetch Error:', error));
+    if (!statusDiv || !resultDiv) {
+        console.error('Brak elementów DOM do wyświetlenia statusu/wyników.');
+        return;
     }
 
+    statusDiv.textContent = 'Ładowanie danych z Cloud Run API...';
+    statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-blue-500 bg-blue-50';
+    resultDiv.innerHTML = '';
 
-    // 2. Ładowanie skryptu Model-Viewer
-    const modelViewerScript = document.createElement('script');
-    modelViewerScript.type = 'module';
-    modelViewerScript.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
-    document.head.appendChild(modelViewerScript);
+    try {
+        const headers = new Headers();
+        // ***** ZMIANA TUTAJ: UŻYWAMY X-Client-Token *****
+        // Wysłanie tokena w nagłówku, którego oczekuje middleware C#
+        headers.append('X-Client-Token', DEMO_TOKEN); 
 
-    // 3. Główne Zapytanie i Renderowanie (GET)
-    fetch(apiEndpoint, {
-        method: 'GET',
-        headers: { 
-            'Content-Type': 'application/json',
-            'X-Client-Token': clientId 
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(data => {
-                throw new Error(`Błąd API: Status ${response.status}. Treść: ${data.error || 'Nieznany błąd.'}`);
-            });
-        }
-        return response.json();
-    })
-    .then(products => {
-        if (!Array.isArray(products)) {
-             throw new Error("API nie zwróciło tablicy produktów.");
-        }
-        
-        // Usunięcie komunikatu 'Ładowanie...'
-        productsContainer.innerHTML = '';
-        
-        // 4. LOGIKA RENDEROWANIA (Uzupelniony KOD!)
-        products.forEach(product => { 
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.innerHTML = `
-                <h2>${product.name}</h2>
-                
-                <model-viewer
-                    src="${product.glb}"
-                    ios-src="${product.usdz}"
-                    alt="${product.alt_text}"
-                    shadow-intensity="1"
-                    camera-controls
-                    touch-action="pan-y"
-                    ar
-                    ar-modes="webxr scene-viewer quick-look"
-                    ar-scale="auto"
-                >
-                    <button slot="ar-button" class="ar-button">
-                        Zobacz w AR
-                    </button>
-                </model-viewer>
-            `;
-            
-            // 5. OBSŁUGA KLIKNIĘCIA I WYSYŁANIE ANALITYKI
-            const arButton = card.querySelector('.ar-button');
-            if (arButton) {
-                arButton.addEventListener('click', () => {
-                    // 💡 Wywołanie funkcji POST do API C#
-                    trackAnalytics(product.productId, clientId);
-                });
-            }
-            
-            productsContainer.appendChild(card);
+        // USUŃ 'Bearer ', ponieważ middleware C# oczekuje tylko samego tokena (TEST_TOKEN_XYZ)
+
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            headers: headers
         });
-    })
-    .catch(error => {
-        productsContainer.innerHTML = `<p style="color: red; font-weight: bold;">[Błąd Krytyczny] Nie można załadować wtyczki: ${error.message}</p>`;
-        console.error("Krytyczny Błąd Fetch:", error);
-    });
-})();
+
+        if (!response.ok) {
+            // Error handling (401 Unauthorized, 404 Not Found, etc.)
+            statusDiv.textContent = `BŁĄD: Otrzymano status ${response.status} (${response.statusText}). Wysłany token (${DEMO_TOKEN}) nie został zaakceptowany.`;
+            statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-red-700 bg-red-100';
+            
+            const errorText = await response.text();
+            resultDiv.innerHTML = `<h3 class="font-semibold text-red-700 mb-2">Treść Błędu:</h3><pre class="bg-red-50 p-4 rounded-lg text-sm whitespace-pre-wrap">${errorText}</pre>`;
+            return;
+        }
+
+        const data = await response.json();
+        
+        // Success
+        statusDiv.textContent = 'SUKCES! Dane JSON otrzymane z Cloud Run (Autoryzacja przyjęta).';
+        statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-green-700 bg-green-100';
+
+        // Displaying formatted JSON data
+        resultDiv.innerHTML = `
+            <h3 class="text-lg font-semibold mb-2">Odebrane dane:</h3>
+            <pre class="bg-gray-100 p-4 rounded-lg text-sm whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>
+        `;
+
+    } catch (error) {
+        // Network/CORS error
+        statusDiv.textContent = `BŁĄD SIECI/CORS: Wystąpił problem z połączeniem z serwerem. Sprawdź konsole przeglądarki.`;
+        statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-red-700 bg-red-100';
+        resultDiv.innerHTML = `<p class="text-red-600 mt-2">Szczegóły błędu: ${error.message}</p>`;
+    }
+}
+
+// Run the initialization when the document is ready
+document.addEventListener('DOMContentLoaded', initializeFrontend);
+
+// Upewnij się, że plik index.html odwołuje się do tego pliku JS:
+// <script src="ar-widget.js"></script>
