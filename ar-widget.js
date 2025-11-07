@@ -1,5 +1,5 @@
 // Cloud Run API endpoint
-const API_URL = 'https://ar-widget-api-849496305543.europe-central2.run.app/api/widget';
+const API_URL = 'https://ar-widget-api-849496305543.europe-central2.run.app/';
         
 // TEST TOKEN (You need to replace this with a valid token if TEST_TOKEN_XYZ fails)
 const DEMO_TOKEN = 'TEST_TOKEN_XYZ'; 
