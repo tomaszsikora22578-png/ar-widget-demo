@@ -1,68 +1,49 @@
 // Cloud Run API endpoint
 const API_URL = 'https://ar-widget-api-849496305543.europe-central2.run.app/api/product/models';
-
-// TEST TOKEN (Zastąp poprawnym tokenem, jeśli TEST_TOKEN_XYZ nie działa)
+// Twój klient-test token (tylko tutaj, nie w HTML)
 const DEMO_TOKEN = 'TEST_TOKEN_XYZ';
 
-// Inicjalizacja frontendu
-function initializeFrontend() {
-    const fetchButton = document.getElementById('fetch-button');
-    if (fetchButton) {
-        fetchButton.addEventListener('click', fetchWidgets);
-        fetchWidgets(); // początkowe pobranie danych
-    }
-}
-
-// Funkcja do pobrania danych z API
+// Funkcja pobierająca dane
 async function fetchWidgets() {
-    const resultDiv = document.getElementById('api-result');
     const statusDiv = document.getElementById('api-status');
+    const resultDiv = document.getElementById('api-result');
 
-    if (!statusDiv || !resultDiv) {
-        console.error('Brak elementów DOM do wyświetlenia statusu/wyników.');
-        return;
-    }
-
-    statusDiv.textContent = 'Ładowanie danych z Cloud Run API...';
-    statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-blue-500 bg-blue-50';
+    statusDiv.textContent = 'Ładowanie danych z Cloud Run...';
+    statusDiv.className = 'mt-4 p-3 rounded bg-blue-50 text-blue-700 font-medium';
     resultDiv.innerHTML = '';
 
     try {
         const headers = new Headers();
-        // Wysyłamy token w obu formach: Authorization + X-Client-Token
+        // Middleware C# wymaga: X-Client-Token
         headers.append('X-Client-Token', DEMO_TOKEN);
 
         const response = await fetch(API_URL, {
             method: 'GET',
-            headers: headers,
+            headers
         });
 
         if (!response.ok) {
-            // Obsługa błędów HTTP
+            statusDiv.textContent = `BŁĄD: ${response.status} (${response.statusText})`;
+            statusDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-700 font-medium';
             const errorText = await response.text();
-            statusDiv.textContent = `BŁĄD: Otrzymano status ${response.status} (${response.statusText}).`;
-            statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-red-700 bg-red-100';
-            resultDiv.innerHTML = `<h3 class="font-semibold text-red-700 mb-2">Treść Błędu:</h3><pre class="bg-red-50 p-4 rounded-lg text-sm whitespace-pre-wrap">${errorText}</pre>`;
+            resultDiv.innerHTML = `<pre>${errorText}</pre>`;
             return;
         }
 
         const data = await response.json();
+        statusDiv.textContent = 'SUKCES! Dane odebrane.';
+        statusDiv.className = 'mt-4 p-3 rounded bg-green-100 text-green-700 font-medium';
+        resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
 
-        // Sukces
-        statusDiv.textContent = 'SUKCES! Dane JSON otrzymane z Cloud Run (Autoryzacja przyjęta).';
-        statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-green-700 bg-green-100';
-        resultDiv.innerHTML = `
-            <h3 class="text-lg font-semibold mb-2">Odebrane dane:</h3>
-            <pre class="bg-gray-100 p-4 rounded-lg text-sm whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>
-        `;
-
-    } catch (error) {
-        // Błąd sieci/CORS
-        statusDiv.textContent = 'BŁĄD SIECI/CORS: Wystąpił problem z połączeniem z serwerem. Sprawdź konsolę przeglądarki.';
-        statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-red-700 bg-red-100';
-        resultDiv.innerHTML = `<p class="text-red-600 mt-2">Szczegóły błędu: ${error.message}</p>`;
+    } catch (e) {
+        statusDiv.textContent = 'Błąd sieci/CORS';
+        statusDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-700 font-medium';
+        resultDiv.innerHTML = `<pre>${e.message}</pre>`;
     }
 }
 
-// Uruchomienie po załadowaniu dokumentu
-document.addEventListener('DOMContentLoaded', initializeFrontend);
+// Listener do przycisku
+document.addEventListener('DOMContentLoaded', () => {
+    const button = document.getElementById('fetch-button');
+    if (button) button.addEventListener('click', fetchWidgets);
+});
