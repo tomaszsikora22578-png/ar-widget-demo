@@ -30,7 +30,6 @@ async function fetchWidgets() {
     try {
         const headers = new Headers();
         // Wysyłamy token w obu formach: Authorization + X-Client-Token
-        headers.append('Authorization', `Bearer ${DEMO_TOKEN}`);
         headers.append('X-Client-Token', DEMO_TOKEN);
 
         const response = await fetch(API_URL, {
