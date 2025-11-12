@@ -14,90 +14,78 @@
 </head>
 <body class="p-8">
 
-    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-10">
-        <h1 class="text-3xl font-bold text-gray-800 mb-4 border-b pb-2">Cloud Run Backend Tester</h1>
-        <p class="text-gray-600 mb-6">
-            Poniższy interfejs próbuje pobrać dane z Twojego wdrożonego API C# na Cloud Run.
-            <br>
-            Adres URL API: <code id="api-url-display" class="bg-gray-200 p-1 rounded-md text-sm"></code>
-            <br>
-            <span id="token-display" class="font-bold text-indigo-700"></span>
-        </p>
+<div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-10">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4 border-b pb-2">Cloud Run Backend Tester</h1>
+    <p class="text-gray-600 mb-6">
+        Poniższy interfejs próbuje pobrać dane z Twojego wdrożonego API C# na Cloud Run.
+        <br>
+        Adres URL API: <code id="api-url-display" class="bg-gray-200 p-1 rounded-md text-sm"></code>
+        <br>
+        <span id="token-display" class="font-bold text-indigo-700"></span>
+    </p>
 
-        <button id="fetch-button" 
-                class="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow-md hover:bg-indigo-700 transition duration-150 transform hover:scale-[1.02]">
-            Testuj Połączenie i Pobierz Dane
-        </button>
+    <button id="fetch-button" 
+            class="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow-md hover:bg-indigo-700 transition duration-150 transform hover:scale-[1.02]">
+        Testuj Połączenie i Pobierz Dane
+    </button>
 
-        <div id="api-status" class="mt-6 p-4 rounded-lg font-medium text-blue-500 bg-blue-50">
-            Wciśnij przycisk, aby rozpocząć test.
-        </div>
-        
-        <div id="api-result" class="mt-6 border-t pt-4">
-            <!-- Tutaj zostaną wyświetlone wyniki JSON -->
-        </div>
+    <div id="api-status" class="mt-6 p-4 rounded-lg font-medium text-blue-500 bg-blue-50">
+        Wciśnij przycisk, aby rozpocząć test.
     </div>
- <script>
-        // ✅ NOWY POPRAWNY ENDPOINT
-        const API_URL = 'https://ar-widget-api-849496305543.europe-central2.run.app/api/product/models';
-        
-        // ✅ TOKEN TESTOWY
-        const DEMO_TOKEN = 'TEST_TOKEN_XYZ'; 
+    
+    <div id="api-result" class="mt-6 border-t pt-4">
+        <!-- Tutaj zostaną wyświetlone wyniki JSON -->
+    </div>
+</div>
 
-        // 🧠 Główna funkcja pobierająca dane z API
-        async function fetchWidgets() {
-            const resultDiv = document.getElementById('api-result');
-            const statusDiv = document.getElementById('api-status');
+<!-- Ładowanie pliku z tokenem i URL -->
+<script src="./ar-widget.js"></script>
 
-            statusDiv.textContent = 'Ładowanie danych z API...';
-            statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-blue-500 bg-blue-50';
-            resultDiv.innerHTML = '';
+<!-- Twój dotychczasowy skrypt korzystający z tych zmiennych -->
+<script>
+async function fetchWidgets() {
+    const resultDiv = document.getElementById('api-result');
+    const statusDiv = document.getElementById('api-status');
 
-            try {
-                const headers = new Headers();
-                // Wysyłamy token w standardowym formacie Bearer
-                headers.append('Authorization', `Bearer ${DEMO_TOKEN}`);
+    statusDiv.textContent = 'Ładowanie danych z API...';
+    statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-blue-500 bg-blue-50';
+    resultDiv.innerHTML = '';
 
-                const response = await fetch(API_URL, {
-                    method: 'GET',
-                    headers: headers
-                });
+    try {
+        const headers = new Headers();
+        headers.append('Authorization', `Bearer ${DEMO_TOKEN}`);
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    statusDiv.textContent = `BŁĄD: ${response.status} (${response.statusText})`;
-                    statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-red-700 bg-red-100';
-                    resultDiv.innerHTML = `
-                        <h3 class="font-semibold text-red-700 mb-2">Treść błędu:</h3>
-                        <pre class="bg-red-50 p-4 rounded-lg text-sm whitespace-pre-wrap">${errorText}</pre>
-                    `;
-                    return;
-                }
+        const response = await fetch(API_URL, { method: 'GET', headers });
 
-                const data = await response.json();
-                statusDiv.textContent = '✅ SUKCES! Dane JSON otrzymane z Cloud Run (autoryzacja przyjęta).';
-                statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-green-700 bg-green-100';
-                resultDiv.innerHTML = `
-                    <h3 class="text-lg font-semibold mb-2">Odebrane dane:</h3>
-                    <pre class="bg-gray-100 p-4 rounded-lg text-sm whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>
-                `;
-            } catch (error) {
-                statusDiv.textContent = `BŁĄD SIECI/CORS: ${error.message}`;
-                statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-red-700 bg-red-100';
-                resultDiv.innerHTML = `<p class="text-red-600 mt-2">Sprawdź konsolę przeglądarki.</p>`;
-                console.error('Szczegóły błędu:', error);
-            }
+        if (!response.ok) {
+            const errorText = await response.text();
+            statusDiv.textContent = `BŁĄD: ${response.status} (${response.statusText})`;
+            statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-red-700 bg-red-100';
+            resultDiv.innerHTML = `<h3 class="font-semibold text-red-700 mb-2">Treść błędu:</h3>
+                                   <pre class="bg-red-50 p-4 rounded-lg text-sm whitespace-pre-wrap">${errorText}</pre>`;
+            return;
         }
 
-        // 🚀 Uruchomienie po załadowaniu strony
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('api-url-display').textContent = API_URL;
-            document.getElementById('token-display').textContent = `Wysyłany token: Bearer ${DEMO_TOKEN}`;
-            document.getElementById('fetch-button').addEventListener('click', fetchWidgets);
-            fetchWidgets(); // automatycznie po starcie
-        });
-    </script>
-    
-    
+        const data = await response.json();
+        statusDiv.textContent = '✅ SUKCES! Dane JSON otrzymane z Cloud Run (autoryzacja przyjęta).';
+        statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-green-700 bg-green-100';
+        resultDiv.innerHTML = `<h3 class="text-lg font-semibold mb-2">Odebrane dane:</h3>
+                               <pre class="bg-gray-100 p-4 rounded-lg text-sm whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
+    } catch (error) {
+        statusDiv.textContent = `BŁĄD SIECI/CORS: ${error.message}`;
+        statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-red-700 bg-red-100';
+        resultDiv.innerHTML = `<p class="text-red-600 mt-2">Sprawdź konsolę przeglądarki.</p>`;
+        console.error('Szczegóły błędu:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('api-url-display').textContent = API_URL;
+    document.getElementById('token-display').textContent = `Wysyłany token: Bearer ${DEMO_TOKEN}`;
+    document.getElementById('fetch-button').addEventListener('click', fetchWidgets);
+    fetchWidgets();
+});
+</script>
+
 </body>
 </html>
