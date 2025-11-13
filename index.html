@@ -53,7 +53,8 @@ async function fetchWidgets() {
 
     try {
         const headers = new Headers();
-        headers.append('Authorization', `Bearer ${DEMO_TOKEN}`);
+     //   headers.append('Authorization', `Bearer ${DEMO_TOKEN}`);
+        headers.append('X-Client-Token', DEMO_TOKEN);
 
         const response = await fetch(API_URL, { method: 'GET', headers });
 
