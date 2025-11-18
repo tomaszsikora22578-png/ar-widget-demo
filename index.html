@@ -34,17 +34,13 @@
         <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             Zobacz nasze produkty w pełnym 3D oraz wykorzystaj technologię Rozszerzonej Rzeczywistości, aby przenieść je do swojego otoczenia.
         </p>
-        <button id="fetch-button" 
-            class="px-10 py-4 bg-indigo-600 text-white font-bold text-lg rounded-full shadow-xl hover:bg-indigo-700 transition duration-200 transform hover:scale-105">
-            Zobacz Dostępne Modele
-        </button>
-    </div>
+        </div>
 </header>
 <div class="max-w-7xl mx-auto p-6 md:p-12">
 
     <div class="max-w-4xl mx-auto">
         <div id="api-status" class="mt-8 p-4 rounded-xl font-medium text-blue-500 bg-blue-50 text-center">
-            Wciśnij przycisk, aby załadować modele 3D.
+            Trwa ładowanie dostępnych modeli...
         </div>
     </div>
     
@@ -57,11 +53,11 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Usunęliśmy wyświetlanie tokenu i API URL
-        document.getElementById('fetch-button').addEventListener('click', fetchWidgetsAndRender);
-        fetchWidgetsAndRender(); // Automatyczne uruchomienie
+        // Natychmiastowe wywołanie ładowania modeli
+        fetchWidgetsAndRender(); 
     });
     
+    // Zostawiamy tę funkcję, choć jest prosta, dla czystości logiki
     async function fetchWidgetsAndRender() {
         await fetchWidgets(); 
     }
