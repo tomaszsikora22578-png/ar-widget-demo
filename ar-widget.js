@@ -7,6 +7,8 @@ const DEMO_TOKEN = 'TEST_TOKEN_XYZ';
 
 // ar-widget.js - Ostateczna funkcja z komunikatem o braku wsparcia AR
 
+// ar-widget.js - Ostateczna funkcja z komunikatem o braku wsparcia AR
+
 function renderModelViewer(modelData) {
     const viewer = document.createElement('model-viewer');
 
