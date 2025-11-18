@@ -8,42 +8,45 @@ const DEMO_TOKEN = 'TEST_TOKEN_XYZ';
 function renderModelViewer(modelData) {
     const viewer = document.createElement('model-viewer');
 
-    // 1. Ustawienie źródeł modeli (dla podglądu 3D)
+    // 1. Konfiguracja Model Viewer
     viewer.setAttribute('src', modelData.signedUrlGlb); 
-    viewer.setAttribute('ios-src', modelData.signedUrlUsdz); // Nadal kluczowe dla Safari i Quick Look
+    viewer.setAttribute('ios-src', modelData.signedUrlUsdz); 
     
-    // 2. Włączamy ar, ale polegamy na własnym przycisku
     viewer.setAttribute('ar', ''); 
-    viewer.setAttribute('ar-modes', 'quick-look'); // Wystarczy Quick Look na iOS
+    viewer.setAttribute('ar-modes', 'quick-look'); 
     viewer.setAttribute('ar-scale', 'auto'); 
     
-    // 3. Ustawienia UX/Prezentacji
+    // 2. Podstawowe UX
     viewer.setAttribute('alt', `Model 3D produktu: ${modelData.name}`);
     viewer.setAttribute('shadow-intensity', '1');
     viewer.setAttribute('camera-controls', ''); 
     viewer.setAttribute('auto-rotate', ''); 
     viewer.setAttribute('loading', 'eager'); 
 
-    // 4. Tworzenie kontenera dla widoczności
+    // 3. TWORZENIE PRZYCISKU 'ZOBACZ W AR' DLA KOMPATYBILNOŚCI
+    
+    const arLink = document.createElement('a');
+    arLink.href = modelData.signedUrlUsdz; // Kluczowy link do USDZ
+    arLink.textContent = 'ZOBACZ W AR';
+    
+    // Ustawienie rel="ar" na elemencie <a> jest wymogiem systemowym iOS.
+    arLink.setAttribute('rel', 'ar'); 
+    
+    // Dodajemy go do slotu 'ar-button' wewnątrz Model Viewer
+    arLink.setAttribute('slot', 'ar-button'); 
+
+    arLink.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
+    
+    // Montowanie elementów
+    viewer.appendChild(arLink);
+    
     const modelWrapper = document.createElement('div');
     modelWrapper.className = 'flex flex-col items-center bg-gray-50 p-4 rounded-xl shadow-lg';
     
     const title = document.createElement('h3');
     title.className = 'text-xl font-bold text-gray-800 mb-4';
     title.textContent = modelData.name;
-    
-    // KROK KRYTYCZNY: TWORZENIE PRZYCISKU 'ZOBACZ W AR' JAKO JAWNY LINK
-    // Użycie znacznika <a> i atrybutu rel="ar" jest najbardziej niezawodne na iOS
-    const arLink = document.createElement('a');
-    arLink.href = modelData.signedUrlUsdz; // Musi wskazywać na plik .usdz
-    arLink.textContent = 'ZOBACZ W AR (Quick Look)';
-    arLink.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
-    
-    // Atrybut rel="ar" jest absolutnie kluczowy, aby iOS wiedział, co ma robić z linkiem.
-    arLink.setAttribute('rel', 'ar'); 
 
-    // Montowanie elementów
-    viewer.appendChild(arLink); // Dodajemy link jako zawartość slotu
     modelWrapper.appendChild(title);
     modelWrapper.appendChild(viewer);
 
