@@ -37,11 +37,26 @@ function renderModelViewer(modelData) {
     arButtonIos.className = 'px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
     
     // --- PRZYCISK 2: SCENE VIEWER (Android) ---
-    const encodedUrl = encodeURIComponent(modelData.signedUrlGlb);
+/*    const encodedUrl = encodeURIComponent(modelData.signedUrlGlb);
     const androidArIntent = `intent://ar.google.com/scene-viewer/1.0?file=${encodedUrl}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=VIEW;end;`;
 
     const arButtonAndroid = document.createElement('a');
     arButtonAndroid.href = androidArIntent;
+    */
+    const arButtonUniversal = document.createElement('button');
+    arButtonUniversal.textContent = 'ZOBACZ W AR';
+    arButtonUniversal.setAttribute('slot', 'ar-button'); // Użycie wbudowanego slotu
+    
+    // Opcjonalnie (ale bezpiecznie): Ustawienie linku USDZ bezpośrednio na przycisku dla ułatwienia wykrywania przez iOS
+    arButtonUniversal.setAttribute('href', modelData.signedUrlUsdz);
+    arButtonUniversal.setAttribute('rel', 'ar'); 
+    
+    arButtonUniversal.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
+    
+    viewer.appendChild(arButtonUniversal);
+
+
+    
     arButtonAndroid.textContent = 'ZOBACZ W AR (Android)';
     arButtonAndroid.setAttribute('slot', 'ar-button'); // Ten sam slot
     arButtonAndroid.setAttribute('id', 'ar-button-android');
