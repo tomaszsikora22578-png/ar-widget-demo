@@ -8,13 +8,13 @@ const DEMO_TOKEN = 'TEST_TOKEN_XYZ';
 function renderModelViewer(modelData) {
     const viewer = document.createElement('model-viewer');
 
-    // 1. Podstawowa Konfiguracja Viewer
+    // 1. Konfiguracja Model Viewer
     viewer.setAttribute('src', modelData.signedUrlGlb); 
     viewer.setAttribute('ios-src', modelData.signedUrlUsdz); 
     
     // Włączamy AR, ale używamy własnych przycisków
     viewer.setAttribute('ar', ''); 
-    viewer.setAttribute('ar-modes', 'quick-look scene-viewer'); // Zostawiamy oba tryby
+    viewer.setAttribute('ar-modes', 'quick-look scene-viewer'); 
     viewer.setAttribute('ar-scale', 'auto'); 
     
     // 2. Ustawienia UX/Prezentacji
@@ -24,50 +24,37 @@ function renderModelViewer(modelData) {
     viewer.setAttribute('auto-rotate', ''); 
     viewer.setAttribute('loading', 'eager'); 
 
-    // --- PRZYCISK 1: QUICK LOOK (iOS, Safari, Chrome) ---
+    // --- PRZYCISK 1: QUICK LOOK (iOS) ---
     const arButtonIos = document.createElement('a');
     arButtonIos.href = modelData.signedUrlUsdz;
     arButtonIos.textContent = 'ZOBACZ W AR (iOS)';
     arButtonIos.setAttribute('rel', 'ar'); 
-    arButtonIos.setAttribute('slot', 'ar-button'); // Slot na przycisk AR
-    arButtonIos.setAttribute('id', 'ar-button-ios'); 
-
-    // Stylizacja (tylko w CSS, by przeglądarka mogła ukryć to automatycznie)
-    // Model Viewer jest wystarczająco sprytny, by pokazać tylko ten odpowiedni przycisk
-    arButtonIos.className = 'px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
+    arButtonIos.setAttribute('slot', 'ar-button');
+    arButtonIos.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
     
     // --- PRZYCISK 2: SCENE VIEWER (Android) ---
-/*    const encodedUrl = encodeURIComponent(modelData.signedUrlGlb);
-    const androidArIntent = `intent://ar.google.com/scene-viewer/1.0?file=${encodedUrl}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=VIEW;end;`;
+    // Musimy zakodować URL Signed URL tak, by Scene Viewer go przyjął.
+    // Używamy double-encoding dla znaku '#' i '?' co często jest wymagane przy Signed URLs.
+    
+    // 1. Kodowanie Signed URL
+    const signedUrl = modelData.signedUrlGlb;
+    const encodedFileUrl = encodeURIComponent(signedUrl);
+
+    // 2. Budowanie linku intent://
+    const androidArIntent = 
+        `intent://ar.google.com/scene-viewer/1.0?file=${encodedFileUrl}&mode=ar_only` + 
+        `#Intent;scheme=https;package=com.google.ar.core;action=VIEW;end;`;
 
     const arButtonAndroid = document.createElement('a');
     arButtonAndroid.href = androidArIntent;
-    */
-    const arButtonUniversal = document.createElement('button');
-    arButtonUniversal.textContent = 'ZOBACZ W AR';
-    arButtonUniversal.setAttribute('slot', 'ar-button'); // Użycie wbudowanego slotu
-    
-    // Opcjonalnie (ale bezpiecznie): Ustawienie linku USDZ bezpośrednio na przycisku dla ułatwienia wykrywania przez iOS
-    arButtonUniversal.setAttribute('href', modelData.signedUrlUsdz);
-    arButtonUniversal.setAttribute('rel', 'ar'); 
-    
-    arButtonUniversal.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
-    
-    viewer.appendChild(arButtonUniversal);
-
-
-    
     arButtonAndroid.textContent = 'ZOBACZ W AR (Android)';
-    arButtonAndroid.setAttribute('slot', 'ar-button'); // Ten sam slot
-    arButtonAndroid.setAttribute('id', 'ar-button-android');
+    arButtonAndroid.setAttribute('slot', 'ar-button');
+    arButtonAndroid.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
 
-    arButtonAndroid.className = 'px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
-
-    // Montowanie elementów do Viewera
+    // Montowanie elementów
     viewer.appendChild(arButtonIos);
     viewer.appendChild(arButtonAndroid);
     
-    // 3. Montowanie do Kontenera
     const modelWrapper = document.createElement('div');
     modelWrapper.className = 'flex flex-col items-center bg-gray-50 p-4 rounded-xl shadow-lg';
     
