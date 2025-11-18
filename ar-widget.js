@@ -5,56 +5,45 @@ const DEMO_TOKEN = 'TEST_TOKEN_XYZ';
 
 // ar-widget.js - Zmodyfikowana funkcja renderowania dla lepszej kompatybilności iOS
 
+// ar-widget.js - Ostateczna funkcja z komunikatem o braku wsparcia AR
+
 function renderModelViewer(modelData) {
     const viewer = document.createElement('model-viewer');
 
-    // 1. Konfiguracja Model Viewer
+    // 1. Konfiguracja Model Viewer (standardowa)
     viewer.setAttribute('src', modelData.signedUrlGlb); 
     viewer.setAttribute('ios-src', modelData.signedUrlUsdz); 
     
-    // Włączamy AR, ale używamy własnych przycisków
     viewer.setAttribute('ar', ''); 
-    viewer.setAttribute('ar-modes', 'quick-look scene-viewer'); 
+    viewer.setAttribute('ar-modes', 'quick-look scene-viewer webxr'); 
     viewer.setAttribute('ar-scale', 'auto'); 
     
-    // 2. Ustawienia UX/Prezentacji
+    // 2. Ustawienia UX
     viewer.setAttribute('alt', `Model 3D produktu: ${modelData.name}`);
     viewer.setAttribute('shadow-intensity', '1');
     viewer.setAttribute('camera-controls', ''); 
     viewer.setAttribute('auto-rotate', ''); 
     viewer.setAttribute('loading', 'eager'); 
-
-    // --- PRZYCISK 1: QUICK LOOK (iOS) ---
-    const arButtonIos = document.createElement('a');
-    arButtonIos.href = modelData.signedUrlUsdz;
-    arButtonIos.textContent = 'ZOBACZ W AR (iOS)';
-    arButtonIos.setAttribute('rel', 'ar'); 
-    arButtonIos.setAttribute('slot', 'ar-button');
-    arButtonIos.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
     
-    // --- PRZYCISK 2: SCENE VIEWER (Android) ---
-    // Musimy zakodować URL Signed URL tak, by Scene Viewer go przyjął.
-    // Używamy double-encoding dla znaku '#' i '?' co często jest wymagane przy Signed URLs.
+    // --- KROK 3: UNIWERSALNY PRZYCISK AR ---
+    const arButton = document.createElement('button');
+    arButton.textContent = 'ZOBACZ W AR';
+    arButton.setAttribute('slot', 'ar-button'); 
+    arButton.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
+
+    // --- KROK 4: KOMUNIKAT O BRAKU WSPARCIA AR (SLOT 'unsupported') ---
+    const arUnsupportedMessage = document.createElement('div');
+    arUnsupportedMessage.setAttribute('slot', 'unsupported');
+    arUnsupportedMessage.className = 'text-center p-4 bg-orange-100 text-orange-800 rounded-lg absolute inset-0 flex items-center justify-center';
     
-    // 1. Kodowanie Signed URL
-    const signedUrl = modelData.signedUrlGlb;
-    const encodedFileUrl = encodeURIComponent(signedUrl);
-
-    // 2. Budowanie linku intent://
-    const androidArIntent = 
-        `intent://ar.google.com/scene-viewer/1.0?file=${encodedFileUrl}&mode=ar_only` + 
-        `#Intent;scheme=https;package=com.google.ar.core;action=VIEW;end;`;
-
-    const arButtonAndroid = document.createElement('a');
-    arButtonAndroid.href = androidArIntent;
-    arButtonAndroid.textContent = 'ZOBACZ W AR (Android)';
-    arButtonAndroid.setAttribute('slot', 'ar-button');
-    arButtonAndroid.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
-
+    // Treść komunikatu
+    arUnsupportedMessage.innerHTML = '⚠️ **Twoja przeglądarka/urządzenie nie wspiera AR.** Spróbuj użyć Safari na iOS lub Chrome na Androidzie.';
+    
     // Montowanie elementów
-    viewer.appendChild(arButtonIos);
-    viewer.appendChild(arButtonAndroid);
-    
+    viewer.appendChild(arButton);
+    viewer.appendChild(arUnsupportedMessage); // Dodajemy komunikat
+
+    // 3. Montowanie do Kontenera
     const modelWrapper = document.createElement('div');
     modelWrapper.className = 'flex flex-col items-center bg-gray-50 p-4 rounded-xl shadow-lg';
     
