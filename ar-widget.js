@@ -134,7 +134,7 @@ async function fetchWidgets() {
                 const modelElement = renderModelViewer(model);
                 viewerContainer.appendChild(modelElement);
             });
-
+/*
             statusDiv.textContent = `✅ SUKCES! Otrzymano i załadowano ${data.length} model(i) 3D.`;
             statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-green-700 bg-green-100';
 
@@ -146,7 +146,7 @@ async function fetchWidgets() {
             resultDiv.innerHTML = `<h3 class="text-lg font-semibold mb-2">Odebrane dane JSON:</h3>
                                    <pre class="bg-gray-100 p-4 rounded-lg text-sm whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
         }
-
+*/
     } catch (e) {
         statusDiv.textContent = `BŁĄD SIECI/CORS: ${e.message}`;
         statusDiv.className = 'mt-6 p-4 rounded-lg font-medium text-red-700 bg-red-100';
