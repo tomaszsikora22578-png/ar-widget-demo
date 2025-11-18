@@ -8,38 +8,51 @@ const DEMO_TOKEN = 'TEST_TOKEN_XYZ';
 function renderModelViewer(modelData) {
     const viewer = document.createElement('model-viewer');
 
-    // 1. Konfiguracja Model Viewer
+    // 1. Podstawowa Konfiguracja Viewer
     viewer.setAttribute('src', modelData.signedUrlGlb); 
     viewer.setAttribute('ios-src', modelData.signedUrlUsdz); 
     
+    // Włączamy AR, ale używamy własnych przycisków
     viewer.setAttribute('ar', ''); 
-    viewer.setAttribute('ar-modes', 'quick-look'); 
+    viewer.setAttribute('ar-modes', 'quick-look scene-viewer'); // Zostawiamy oba tryby
     viewer.setAttribute('ar-scale', 'auto'); 
     
-    // 2. Podstawowe UX
+    // 2. Ustawienia UX/Prezentacji
     viewer.setAttribute('alt', `Model 3D produktu: ${modelData.name}`);
     viewer.setAttribute('shadow-intensity', '1');
     viewer.setAttribute('camera-controls', ''); 
     viewer.setAttribute('auto-rotate', ''); 
     viewer.setAttribute('loading', 'eager'); 
 
-    // 3. TWORZENIE PRZYCISKU 'ZOBACZ W AR' DLA KOMPATYBILNOŚCI
-    
-    const arLink = document.createElement('a');
-    arLink.href = modelData.signedUrlUsdz; // Kluczowy link do USDZ
-    arLink.textContent = 'ZOBACZ W AR';
-    
-    // Ustawienie rel="ar" na elemencie <a> jest wymogiem systemowym iOS.
-    arLink.setAttribute('rel', 'ar'); 
-    
-    // Dodajemy go do slotu 'ar-button' wewnątrz Model Viewer
-    arLink.setAttribute('slot', 'ar-button'); 
+    // --- PRZYCISK 1: QUICK LOOK (iOS, Safari, Chrome) ---
+    const arButtonIos = document.createElement('a');
+    arButtonIos.href = modelData.signedUrlUsdz;
+    arButtonIos.textContent = 'ZOBACZ W AR (iOS)';
+    arButtonIos.setAttribute('rel', 'ar'); 
+    arButtonIos.setAttribute('slot', 'ar-button'); // Slot na przycisk AR
+    arButtonIos.setAttribute('id', 'ar-button-ios'); 
 
-    arLink.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
+    // Stylizacja (tylko w CSS, by przeglądarka mogła ukryć to automatycznie)
+    // Model Viewer jest wystarczająco sprytny, by pokazać tylko ten odpowiedni przycisk
+    arButtonIos.className = 'px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
     
-    // Montowanie elementów
-    viewer.appendChild(arLink);
+    // --- PRZYCISK 2: SCENE VIEWER (Android) ---
+    const encodedUrl = encodeURIComponent(modelData.signedUrlGlb);
+    const androidArIntent = `intent://ar.google.com/scene-viewer/1.0?file=${encodedUrl}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=VIEW;end;`;
+
+    const arButtonAndroid = document.createElement('a');
+    arButtonAndroid.href = androidArIntent;
+    arButtonAndroid.textContent = 'ZOBACZ W AR (Android)';
+    arButtonAndroid.setAttribute('slot', 'ar-button'); // Ten sam slot
+    arButtonAndroid.setAttribute('id', 'ar-button-android');
+
+    arButtonAndroid.className = 'px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
+
+    // Montowanie elementów do Viewera
+    viewer.appendChild(arButtonIos);
+    viewer.appendChild(arButtonAndroid);
     
+    // 3. Montowanie do Kontenera
     const modelWrapper = document.createElement('div');
     modelWrapper.className = 'flex flex-col items-center bg-gray-50 p-4 rounded-xl shadow-lg';
     
