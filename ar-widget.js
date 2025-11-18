@@ -3,32 +3,28 @@ const API_URL = 'https://ar-widget-api-849496305543.europe-central2.run.app/api/
 // Twój klient-test token
 const DEMO_TOKEN = 'TEST_TOKEN_XYZ';
 
-// KROK 2: NOWA FUNKCJA DO RENDEROWANIA MODELU 3D
+// ar-widget.js - Zmodyfikowana funkcja renderowania dla lepszej kompatybilności iOS
+
 function renderModelViewer(modelData) {
     const viewer = document.createElement('model-viewer');
 
-    // 1. Ustawienie źródła modelu GLB (Android, PC)
+    // 1. Ustawienie źródeł modeli (dla podglądu 3D)
     viewer.setAttribute('src', modelData.signedUrlGlb); 
+    viewer.setAttribute('ios-src', modelData.signedUrlUsdz); // Nadal kluczowe dla Safari i Quick Look
     
-    // 2. Ustawienie źródła modelu USDZ (iOS - kluczowe dla AR Quick Look)
-    viewer.setAttribute('ios-src', modelData.signedUrlUsdz); 
-
-    // 3. Włączenie funkcjonalności AR
-    viewer.setAttribute('ar', ''); // Włącz AR
-    viewer.setAttribute('ar-modes', 'webxr scene-viewer quick-look'); // Obsługa różnych platform
-    viewer.setAttribute('ar-scale', 'auto'); // Automatyczne dopasowanie skali
-
-    // 4. Ustawienia UX/Prezentacji
+    // 2. Włączamy ar, ale polegamy na własnym przycisku
+    viewer.setAttribute('ar', ''); 
+    viewer.setAttribute('ar-modes', 'quick-look'); // Wystarczy Quick Look na iOS
+    viewer.setAttribute('ar-scale', 'auto'); 
+    
+    // 3. Ustawienia UX/Prezentacji
     viewer.setAttribute('alt', `Model 3D produktu: ${modelData.name}`);
     viewer.setAttribute('shadow-intensity', '1');
-    viewer.setAttribute('camera-controls', ''); // Umożliwia obracanie i skalowanie
-    viewer.setAttribute('auto-rotate', ''); // Automatyczne obracanie (opcjonalne)
-    viewer.setAttribute('loading', 'eager'); // Szybkie ładowanie
+    viewer.setAttribute('camera-controls', ''); 
+    viewer.setAttribute('auto-rotate', ''); 
+    viewer.setAttribute('loading', 'eager'); 
 
-    // Dodanie przycisku AR (używamy domyślnego przycisku Model Viewer)
-    viewer.setAttribute('id', `model-${modelData.name.replace(/\s/g, '-')}`);
-
-    // Dodanie nagłówka dla modelu
+    // 4. Tworzenie kontenera dla widoczności
     const modelWrapper = document.createElement('div');
     modelWrapper.className = 'flex flex-col items-center bg-gray-50 p-4 rounded-xl shadow-lg';
     
@@ -36,12 +32,23 @@ function renderModelViewer(modelData) {
     title.className = 'text-xl font-bold text-gray-800 mb-4';
     title.textContent = modelData.name;
     
+    // KROK KRYTYCZNY: TWORZENIE PRZYCISKU 'ZOBACZ W AR' JAKO JAWNY LINK
+    // Użycie znacznika <a> i atrybutu rel="ar" jest najbardziej niezawodne na iOS
+    const arLink = document.createElement('a');
+    arLink.href = modelData.signedUrlUsdz; // Musi wskazywać na plik .usdz
+    arLink.textContent = 'ZOBACZ W AR (Quick Look)';
+    arLink.className = 'mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition duration-150 transform hover:scale-[1.02]';
+    
+    // Atrybut rel="ar" jest absolutnie kluczowy, aby iOS wiedział, co ma robić z linkiem.
+    arLink.setAttribute('rel', 'ar'); 
+
+    // Montowanie elementów
+    viewer.appendChild(arLink); // Dodajemy link jako zawartość slotu
     modelWrapper.appendChild(title);
     modelWrapper.appendChild(viewer);
 
     return modelWrapper;
 }
-
 // Funkcja pobierająca dane i renderująca modele 3D
 async function fetchWidgets() {
     const statusDiv = document.getElementById('api-status');
