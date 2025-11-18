@@ -39,6 +39,20 @@
         </button>
     </div>
 </header>
+
+    <div class="max-w-7xl mx-auto p-6 md:p-12">
+
+    <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6 mb-8 mt-4">
+        <div id="api-status" class="p-4 rounded-lg font-medium text-blue-500 bg-blue-50">
+            Wciśnij przycisk, aby rozpocząć test.
+        </div>
+        <div id="api-result" class="mt-4 border-t pt-4"></div>
+    </div>
+    
+    <div id="model-viewer-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    </div>
+
+</div>
 <script src="./ar-widget.js"></script>
 
 <script>
@@ -53,6 +67,7 @@
         // Funkcja fetchWidgets jest w ar-widget.js i zawiera całą logikę renderowania
         await fetchWidgets(); 
     }
+    
 </script>
 
 </body>
