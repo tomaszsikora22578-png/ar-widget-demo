@@ -50,6 +50,8 @@ function renderModelViewer(modelData) {
     viewer.setAttribute('camera-controls', ''); 
     viewer.setAttribute('auto-rotate', ''); 
     viewer.setAttribute('loading', 'eager'); 
+    viewer.setAttribute('exposure', '0.9'); // Lekkie przyciemnienie, aby usunąć prześwietlenie
+viewer.setAttribute('environment-image', 'neutral');
     
     // --- KROK 3: UNIWERSALNY PRZYCISK AR (Czysty HTML) ---
     // Używamy prostego buttona bez listenerów, aby nie zakłócać AR Quick Look
