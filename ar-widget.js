@@ -32,39 +32,37 @@ async function trackArClick(productId) {
 
 function renderModelViewer(modelData) {
     const viewer = document.createElement('model-viewer');
-
-    // 1. Konfiguracja Model Viewer
+    
+    // 1. Konfiguracja Model Viewer (standardowa)
     viewer.setAttribute('src', modelData.signedUrlGlb); 
     viewer.setAttribute('ios-src', modelData.signedUrlUsdz); 
+    
     viewer.setAttribute('ar', ''); 
     viewer.setAttribute('ar-modes', 'quick-look scene-viewer webxr'); 
     viewer.setAttribute('ar-scale', 'auto'); 
     
+    // Ustawienie ProductId jako atrybutu DOM w celu wyłapania w listenerze eventu
+    viewer.setAttribute('data-product-id', modelData.ProductId); 
+
     // 2. Ustawienia UX
     viewer.setAttribute('alt', `Model 3D produktu: ${modelData.name}`);
-    viewer.setAttribute('shadow-intensity', '1.5'); // Zwiększony cień dla lepszej wizualizacji
+    viewer.setAttribute('shadow-intensity', '1.5'); 
     viewer.setAttribute('camera-controls', ''); 
     viewer.setAttribute('auto-rotate', ''); 
     viewer.setAttribute('loading', 'eager'); 
     
-    // --- KROK 3: UNIWERSALNY PRZYCISK AR ---
+    // --- KROK 3: UNIWERSALNY PRZYCISK AR (Czysty HTML) ---
+    // Używamy prostego buttona bez listenerów, aby nie zakłócać AR Quick Look
     const arButton = document.createElement('button');
     arButton.textContent = 'ZOBACZ W AR';
     arButton.setAttribute('slot', 'ar-button'); 
     
-    // Udoskonalony przycisk: Większy, bardziej okrągły, cieplejszy cień
+    // Udoskonalony przycisk (wizualizacja bez zmian)
     arButton.className = 'w-full mt-4 px-6 py-3 bg-indigo-600 text-white font-bold text-lg rounded-full shadow-lg shadow-indigo-500/50 hover:bg-indigo-700 transition duration-150 transform hover:scale-[1.03]';
-
-    // Listener dla analityki
-    arButton.addEventListener('click', () => {
-        trackArClick(modelData.ProductId); 
-    });
-
 
     // --- KROK 4: KOMUNIKAT O BRAKU WSPARCIA AR ---
     const arUnsupportedMessage = document.createElement('div');
     arUnsupportedMessage.setAttribute('slot', 'unsupported');
-    // Ładniejszy i bardziej kontrastowy komunikat o błędzie
     arUnsupportedMessage.className = 'text-center p-6 bg-red-50 border-2 border-red-300 text-red-800 rounded-xl absolute inset-0 flex flex-col items-center justify-center';
     arUnsupportedMessage.innerHTML = '⚠️ <span class="font-extrabold text-xl block mb-2">Brak wsparcia AR.</span> <span class="text-sm">Funkcja AR wymaga telefonu/tabletu z systemem iOS (Safari) lub Android (Chrome).</span>';
     
@@ -74,11 +72,11 @@ function renderModelViewer(modelData) {
 
     // 3. Montowanie do Kontenera
     const modelWrapper = document.createElement('div');
-    // Udoskonalona Karta: Wyższe zaokrąglenie, lepszy cień i efekt hover
+    // Udoskonalona Karta (bez zmian)
     modelWrapper.className = 'flex flex-col items-center bg-white p-6 rounded-3xl shadow-xl hover:shadow-2xl hover:shadow-indigo-300/60 transition duration-300 transform hover:-translate-y-1';
     
     const title = document.createElement('h3');
-    // Udoskonalony Tytuł: Większy, odważniejszy i z akcentem
+    // Udoskonalony Tytuł (bez zmian)
     title.className = 'text-2xl font-extrabold text-gray-900 mb-4 border-b border-indigo-100 pb-2 w-full text-center tracking-tight';
     title.textContent = modelData.name;
 
@@ -88,6 +86,27 @@ function renderModelViewer(modelData) {
     return modelWrapper;
 }
 
+// ------------------------------------------------------------------
+// DODAJ TEN GLOBALNY LISTENER NA KONIEC PLIKU ar-widget.js
+// ------------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Używamy delegowania eventów na całym kontenerze, aby wyłapać event z model-viewer
+    const viewerContainer = document.getElementById('model-viewer-container');
+    
+    if (viewerContainer) {
+        viewerContainer.addEventListener('ar-button-activated', (event) => {
+            // Wyciągamy ID produktu bezpośrednio z atrybutu data-product-id
+            const modelViewerElement = event.target;
+            const productId = modelViewerElement.getAttribute('data-product-id');
+            
+            if (productId) {
+                // Teraz bezpiecznie uruchamiamy analitykę PO AKTYWACJI PRZYCISKU
+                trackArClick(parseInt(productId, 10));
+            }
+        });
+    }
+});
 // Funkcja fetchWidgets (bez zmian, ale usunięta sekcja JSON)
 async function fetchWidgets() {
     const statusDiv = document.getElementById('api-status');
