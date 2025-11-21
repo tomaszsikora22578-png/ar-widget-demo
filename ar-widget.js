@@ -3,32 +3,30 @@ const API_URL = 'https://ar-widget-api-849496305543.europe-central2.run.app/api/
 const DEMO_TOKEN = 'TEST_TOKEN_XYZ';
 const ANALYTICS_URL = 'https://ar-widget-api-849496305543.europe-central2.run.app/api/analytics/track';
 
-// Funkcja analityczna (bez zmian)
-async function trackArClick(productId) {
+//Funkcja analityczna, używająca navigator.sendBeacon()
+function trackArClick(productId) {
     if (!productId) return;
     
-    try {
-        const payload = { ProductId: productId };
-        const headers = new Headers();
-        headers.append('X-Client-Token', DEMO_TOKEN);
-        headers.append('Content-Type', 'application/json');
+    // 1. Dodajemy Token jako Query String do adresu URL analityki.
+    // Jest to konieczne, ponieważ sendBeacon() nie obsługuje nagłówków.
+    const urlWithToken = `${ANALYTICS_URL}?token=${DEMO_TOKEN}`;
 
-        const response = await fetch(ANALYTICS_URL, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(payload)
-        });
+    // 2. Przygotowanie Payloadu JSON
+    const payload = { ProductId: parseInt(productId, 10) };
+    
+    // Tworzenie Blob (binarny obiekt danych) z poprawnym typem (Content-Type)
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
 
-        if (response.status === 204) {
-            console.log(`✅ Zdarzenie AR_CLICK dla ProductId ${productId} zarejestrowane.`);
-        } else {
-            console.error(`BŁĄD rejestracji AR: ${response.status}`, await response.text());
-        }
-    } catch (error) {
-        console.error('Błąd sieci podczas śledzenia AR:', error);
+    // 3. Wysłanie danych w tle
+    // Przeglądarka gwarantuje, że to żądanie zostanie wysłane, nawet jeśli użytkownik opuści stronę (przechodząc do AR).
+    const success = navigator.sendBeacon(urlWithToken, blob);
+
+    if (success) {
+        console.log(`✅ Beacon AR_CLICK dla ProductId ${productId} wysłany przez sendBeacon.`);
+    } else {
+        console.error('BŁĄD: Przeglądarka odrzuciła sendBeacon. Dane mogły być zbyt duże.');
     }
 }
-
 
 function renderModelViewer(modelData) {
     const viewer = document.createElement('model-viewer');
